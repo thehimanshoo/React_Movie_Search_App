@@ -1,8 +1,8 @@
-const  express = require('express');
+const express = require("express");
 const router = express.Router();
-const authenticate = require('../middlewares/authenticate');
-const {body,validationResult} = require('express-validator');
-const Event = require('../models/Events');
+const authenticate = require("../middlewares/authenticate");
+const { body, validationResult } = require("express-validator");
+const Event = require("../models/Events");
 
 /*
 Events Router
@@ -13,32 +13,36 @@ methode : post
 access : private
 
 */
-router.post('/upload' , authenticate,[
-    body('name').notEmpty().withMessage('name is required'),
-    body('image').notEmpty().withMessage('image is required'),
-    body('date').notEmpty().withMessage('date is required'),
-    body('type').notEmpty().withMessage('type is required'),
-    body('price').notEmpty().withMessage('price is required'),
-    body('info').notEmpty().withMessage('info is required')
-] ,async (request,response) => {
-    let error =validationResult(request);
-    if (!error.isEmpty()){
-        return response.status(401).json({error : error.array() })
+router.post(
+  "/upload",
+  authenticate,
+  [
+    body("name").notEmpty().withMessage("name is required"),
+    body("image").notEmpty().withMessage("image is required"),
+    body("date").notEmpty().withMessage("date is required"),
+    body("type").notEmpty().withMessage("type is required"),
+    body("price").notEmpty().withMessage("price is required"),
+    body("info").notEmpty().withMessage("info is required"),
+  ],
+  async (request, response) => {
+    let error = validationResult(request);
+    if (!error.isEmpty()) {
+      return response.status(401).json({ error: error.array() });
     }
-    try{
-       let {name ,image , date , type, price , info} = request.body;
-       let user = request.user.id;
+    try {
+      let { name, image, date, type, price, info } = request.body;
+      let user = request.user.id;
 
-       let event = new Event({user, name , image , date, type,price, info});
-       event = await event.save()
+      let event = new Event({ user, name, image, date, type, price, info });
+      event = await event.save();
 
-        response.status(200).json({msg : ' event is uploaded'})
+      response.status(200).json({ msg: " event is uploaded" });
+    } catch (e) {
+      console.error([{ msg: e.message }]);
+      response.status(500).json({ error: e.array() });
     }
-    catch (e) {
-        console.error([{msg : e.message}]);
-        response.status(500).json({error : e.array() })
-    }
-});
+  }
+);
 
 /*
 Events Router
@@ -50,16 +54,14 @@ access : public
 
 */
 
-router.get('/free' , async (request,response) => {
-
-    try{
-        let freeEvents = await  Event.find({type : 'FREE'})
-        response.status(200).json(freeEvents);
-    }
-    catch (e) {
-        console.error(e)
-        response.status(500).json({error : e.array() })
-    }
+router.get("/free", async (request, response) => {
+  try {
+    let freeEvents = await Event.find({ type: "FREE" });
+    response.status(200).json(freeEvents);
+  } catch (e) {
+    console.error(e);
+    response.status(500).json({ error: e.array() });
+  }
 });
 
 /*
@@ -72,17 +74,14 @@ access : private
 
 */
 
-router.get('/pro' ,authenticate ,async (request,response) => {
-
-    try{
-
-        let proEvents = await  Event.find({type : 'PRO'})
-        response.status(200).json(proEvents);
-    }
-    catch (e) {
-         console.error(e)
-        response.status(500).json({error : e.array() })
-    }
+router.get("/pro", authenticate, async (request, response) => {
+  try {
+    let proEvents = await Event.find({ type: "PRO" });
+    response.status(200).json(proEvents);
+  } catch (e) {
+    console.error(e);
+    response.status(500).json({ error: e.array() });
+  }
 });
 
-module.exports = router
+module.exports = router;
